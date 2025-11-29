@@ -24,9 +24,9 @@ This configuration supports both **Claude Desktop** and **Claude Code CLI**.
 This configuration script sets up the unified PROJECT_ROOT architecture:
 
 **Fresh Install (from cloned FW_ROOT):**
-1. Ask for PROJECT_ROOT location
-2. Create PROJECT_ROOT directory structure
-3. Set up books directory
+1. Detect PROJECT_ROOT (parent of FW_ROOT)
+2. Create directory structure (books, .config/)
+3. Set up books directory name
 4. Create CONFIG_ROOT (.config/) with all files
 5. Generate startup scripts
 6. Initialize git repository
@@ -183,48 +183,72 @@ Proceeding with [mode] workflow...
 
 **This step runs when configure.md is executed from a freshly cloned FW_ROOT.**
 
-### 2A.1: Get PROJECT_ROOT Location
+### 2A.1: Determine PROJECT_ROOT Location
 
-**⏸️ ASK USER:**
+**PROJECT_ROOT is automatically computed as the parent directory of FW_ROOT.**
 
+The user has already chosen where to place the framework by cloning it to a specific location. PROJECT_ROOT is simply one level up from that location.
+
+**Compute PROJECT_ROOT:**
+```bash
+# Get parent directory of current location (FW_ROOT)
+PROJECT_ROOT="$(dirname "$(pwd)")"
+echo "PROJECT_ROOT: $PROJECT_ROOT"
+```
+
+Store as `PROJECT_ROOT`.
+
+**Validate using bash:**
+```bash
+# Check if we're at a drive/filesystem root (no valid parent)
+if [ "$(pwd)" = "$(dirname "$(pwd)")" ]; then
+    echo "ERROR_AT_ROOT"
+else
+    echo "PARENT_VALID"
+fi
+
+# Check if PROJECT_ROOT is writable
+test -w "$PROJECT_ROOT" && echo "WRITABLE" || echo "NOT_WRITABLE"
+```
+
+**Validation rules:**
+- Must not be running from filesystem root (no valid parent)
+- Parent directory must be writable
+
+**If at filesystem root:** Show error:
+```
+❌ Invalid Location
+
+configure.bat/sh is running from a filesystem root.
+FW_ROOT must be inside a parent directory that will become PROJECT_ROOT.
+
+Example structure:
+  E:\My-Writing\          ← PROJECT_ROOT (parent)
+  └── FW_ROOT\            ← Clone framework here
+      └── configure.bat   ← Run from here
+
+Solution: Move or re-clone the framework into a subdirectory.
+```
+
+**Show computed path to user:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-PROJECT_ROOT Setup
+PROJECT_ROOT Detected
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Where would you like to create your writing environment?
+Based on your framework location:
+  FW_ROOT:      [current directory]
+  PROJECT_ROOT: [computed parent directory]
 
 PROJECT_ROOT will contain:
-  • FW_ROOT/ - Framework files (cloned from this location)
+  • FW_ROOT/ - Framework files (already here)
   • [Books directory]/ - All your book projects
   • .config/ - Configuration files
   • Git repository for your content
 
-Examples:
-  • Windows: E:\My-Writing
-  • macOS: ~/Documents/My-Writing
-  • Linux: ~/writing
-
-Enter path for PROJECT_ROOT:
+Proceeding with setup...
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
-
-**WAIT for user response.** Store as `PROJECT_ROOT`.
-
-**Validate using bash:**
-```bash
-# Check if PROJECT_ROOT already exists
-test -e "[PROJECT_ROOT]" && echo "PATH_EXISTS" || echo "PATH_AVAILABLE"
-
-# Check if parent directory exists (extract parent from path)
-test -d "$(dirname "[PROJECT_ROOT]")" && echo "PARENT_EXISTS" || echo "PARENT_NOT_FOUND"
-```
-
-**Validation rules:**
-- Path must not already exist (or must be empty)
-- Parent directory must exist and be writable
-
-**If validation fails:** Show appropriate error from Error Handling section.
 
 ### 2A.1.5: Books Directory Name
 
@@ -254,10 +278,11 @@ Enter name [My-Books]:
 
 Store as `BOOKS_DIR_NAME`. The full path will be `[PROJECT_ROOT]/[BOOKS_DIR_NAME]`.
 
-### 2A.2: Create PROJECT_ROOT Directory Structure
+### 2A.2: Create Directory Structure
+
+**Note:** PROJECT_ROOT already exists (it's the parent of FW_ROOT). Create the additional directories needed.
 
 ```bash
-mkdir -p "[PROJECT_ROOT]"
 mkdir -p "[PROJECT_ROOT]/[BOOKS_DIR_NAME]"
 mkdir -p "[PROJECT_ROOT]/[BOOKS_DIR_NAME]/Archive"
 mkdir -p "[PROJECT_ROOT]/.config"
@@ -265,43 +290,39 @@ mkdir -p "[PROJECT_ROOT]/.config/.claude/agents"
 mkdir -p "[PROJECT_ROOT]/.config/.claude/commands"
 ```
 
-### 2A.3: Clone Framework into FW_ROOT
+### 2A.3: Verify FW_ROOT
 
-**⏸️ ASK USER:**
+**FW_ROOT is already in place** (user cloned the framework to this location and ran configure from it).
 
-```
-How should the framework be installed in PROJECT_ROOT?
+**Store paths:**
+- `FW_ROOT` = current directory (where configure.bat/sh was run)
+- Read VERSION from `[FW_ROOT]/VERSION` and store as `FW_VERSION`
 
-1. Copy - Copy framework files from current location
-2. Clone - Fresh clone from GitHub (recommended)
-
-Option (1 or 2):
-```
-
-**WAIT for user response.**
-
-**If Copy:**
+**Verify FW_ROOT is valid:**
 ```bash
-# Copy entire framework directory
-cp -r "[CURRENT_DIRECTORY]" "[PROJECT_ROOT]/FW_ROOT"
+# Confirm VERSION file exists
+test -f "VERSION" && echo "FW_ROOT_VALID" || echo "FW_ROOT_INVALID"
+
+# Read version
+FW_VERSION=$(cat VERSION)
+echo "Framework version: $FW_VERSION"
 ```
 
-**If Clone:**
-```bash
-git clone https://github.com/scooter-indie/author-nonfiction-dist.git "[PROJECT_ROOT]/FW_ROOT"
-```
-
-Store FW_ROOT path: `FW_ROOT=[PROJECT_ROOT]/FW_ROOT`
-
-Read VERSION from `[FW_ROOT]/VERSION` and store as `FW_VERSION`.
+**If FW_ROOT invalid:** Show error from Error Handling section (Missing Framework Files).
 
 ### 2A.4: Create .gitignore
+
+**Get the FW_ROOT folder name** (basename of current directory):
+```bash
+FW_ROOT_NAME=$(basename "$(pwd)")
+echo "FW_ROOT folder name: $FW_ROOT_NAME"
+```
 
 Write to `[PROJECT_ROOT]/.gitignore`:
 
 ```
 # Ignore framework directory (tracked in separate repo)
-FW_ROOT/
+[FW_ROOT_NAME]/
 
 # OS files
 .DS_Store
@@ -311,6 +332,8 @@ Thumbs.db
 *.swp
 *~
 ```
+
+**Note:** Use the actual folder name (e.g., "author-nonfiction-dist", "FW_ROOT", etc.) rather than a hardcoded value.
 
 ### 2A.5: Create Configuration Files
 
@@ -521,7 +544,7 @@ Created:
   ✓ .config/.claude/commands/ (fw-init, switch-book, manage-book)
   ✓ .config/.claude/agents/ (book-writing-assistant)
   ✓ [BOOKS_DIR_NAME]/Archive/
-  ✓ .gitignore (excludes FW_ROOT/)
+  ✓ .gitignore (excludes [FW_ROOT_NAME]/)
   ✓ start-authoring scripts
   ✓ Git repository initialized
   [✓ Remote repository connected (if configured)]
@@ -731,34 +754,35 @@ To install git:
 After installing git, run this configuration again.
 ```
 
-### PROJECT_ROOT Path Invalid
+### Running from Filesystem Root
 
 ```
-❌ Invalid PROJECT_ROOT Path
+❌ Invalid Location
 
-The path you specified has an issue:
-[specific error]
+configure.bat/sh is running from a filesystem root.
+FW_ROOT must be inside a parent directory that will become PROJECT_ROOT.
 
-Please verify:
-1. Parent directory exists
-2. You have write permissions
-3. Path doesn't already contain files (must be empty or not exist)
+Example structure:
+  E:\My-Writing\          ← PROJECT_ROOT (parent)
+  └── FW_ROOT\            ← Clone framework here
+      └── configure.bat   ← Run from here
 
-Try again with a valid path.
+Solution: Move or re-clone the framework into a subdirectory.
 ```
 
-### PROJECT_ROOT Already Exists
+### PROJECT_ROOT Not Writable
 
 ```
-⚠️ Directory Already Exists
+❌ Permission Denied
 
-The path "[PROJECT_ROOT]" already exists.
+Cannot write to PROJECT_ROOT directory:
+  [PROJECT_ROOT path]
 
-Options:
-1. Choose a different location
-2. Use existing directory (must be empty)
+Please verify you have write permissions to this location.
 
-What would you like to do?
+Solutions:
+1. Run the terminal/command prompt as administrator
+2. Move the framework to a writable location
 ```
 
 ---
@@ -769,9 +793,9 @@ What would you like to do?
 
 **PROJECT_ROOT** contains everything:
 - `.git/` - Git repository for your content
-- `.gitignore` - Excludes FW_ROOT/
+- `.gitignore` - Excludes framework folder
 - `start-authoring.*` - Launch scripts
-- `FW_ROOT/` - Framework (separate git repo, excluded from PROJECT_ROOT's git)
+- `[FW_ROOT_NAME]/` - Framework folder (e.g., "author-nonfiction-dist", separate git repo, excluded from PROJECT_ROOT's git)
 - `[BOOKS_DIR_NAME]/` - Your books (default: My-Books)
 - `.config/` - Configuration (CONFIG_ROOT)
 
@@ -781,9 +805,9 @@ What would you like to do?
 - ✅ [BOOKS_DIR_NAME]/ (all book content)
 - ✅ .config/ (configuration files)
 - ✅ start-authoring scripts
-- ❌ FW_ROOT/ (excluded via .gitignore - it's a separate repo)
+- ❌ [FW_ROOT_NAME]/ (excluded via .gitignore - it's a separate repo)
 
-**In FW_ROOT git:**
+**In [FW_ROOT_NAME] git:**
 - ✅ Framework files (Process/, VERSION, etc.)
 - ❌ No user content
 
