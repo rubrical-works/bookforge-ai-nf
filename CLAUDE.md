@@ -42,6 +42,7 @@ author-nonfiction/           # Development repo (THIS REPO)
 ├── scripts/                 # Shell scripts (deployed to dist)
 ├── .claude/                 # Claude Code config
 │   └── commands/           # Slash commands (gh-workflow.md is maintainer-only)
+├── Testing/                 # Test plans (NOT deployed)
 ├── Documentation/           # Maintainer docs (NOT deployed)
 ├── Proposal/               # Design proposals (NOT deployed)
 │   └── Implemented/        # Completed proposals

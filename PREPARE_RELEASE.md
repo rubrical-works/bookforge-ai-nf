@@ -352,7 +352,27 @@ Manifest saved: Process/Templates/framework_files_manifest.json
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**IMPORTANT: Step 4.7 - Documentation/ Directory Exclusion**
+### Step 4.7: Review Test Plans
+
+**Review and update test plans in Testing/ directory:**
+
+1. **Check for new test cases:**
+   - Review commits since last release for testable changes
+   - Add new test cases with the release version number
+
+2. **Update version coverage:**
+   - Update "Covers Versions" range in affected test plan headers
+   - Example: `v0.16.0 - v0.16.1` → `v0.16.0 - v0.17.0`
+
+3. **Mark deprecated tests:**
+   - If features removed, mark test cases as deprecated
+   - Don't delete historical tests; add note for removal reason
+
+**Note:** Testing/ directory is developer-only (NOT deployed to -dist). It contains modular test plans organized by feature area.
+
+---
+
+**IMPORTANT: Step 4.8 - Documentation/ Directory Exclusion**
 
 The `Documentation/` directory contains maintainer documentation and is NOT included in user release packages:
 - Documentation/ is excluded in `.github/workflows/release.yml` build step
@@ -376,7 +396,6 @@ The `Documentation/` directory contains maintainer documentation and is NOT incl
     "Process/Styles/Academic": ["Academic_Authority.md", ...],
     "Process/Scripts": ["compile-manuscript.sh", "README.md"],
     "Process/migrations": ["README.md", "migrate-0.14.5-to-0.15.0.md"],
-    "Process/Testing": ["Hierarchical_Style_Testing_Checklist.md"],
     ".claude": ["README.md", "hooks.json"],
     ".claude/agents": ["book-writing-assistant.md"],
     ".claude/commands": ["fw-init.md"]
@@ -384,7 +403,7 @@ The `Documentation/` directory contains maintainer documentation and is NOT incl
 }
 ```
 
-**Note:** Documentation/, Proposal/, .github/, PREPARE_RELEASE.md, CHANGELOG.md are NOT in manifest - excluded from user releases
+**Note:** Documentation/, Proposal/, Testing/, .github/, PREPARE_RELEASE.md, CHANGELOG.md are NOT in manifest - excluded from user releases
 
 **Why this matters:**
 - During framework updates, configure.md will:

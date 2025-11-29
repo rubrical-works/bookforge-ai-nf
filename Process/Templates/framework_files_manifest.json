@@ -167,9 +167,6 @@
     "Process/Templates/.claude/agents": [
       "book-writing-assistant.md"
     ],
-    "Process/Testing": [
-      "Hierarchical_Style_Testing_Checklist.md"
-    ],
     ".claude": [
       "README.md",
       "hooks.json"

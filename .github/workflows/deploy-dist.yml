@@ -80,6 +80,9 @@ jobs:
           # Remove Documentation directory (maintainer-only, v0.15.0+)
           rm -rf Documentation/
 
+          # Remove Testing directory (maintainer-only, v0.16.1+)
+          rm -rf Testing/
+
           # Remove local settings
           rm -f .claude/settings.local.json
 
