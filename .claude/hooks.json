@@ -1,13 +1,16 @@
 {
-  "hooks": [
-    {
-      "type": "SessionStart",
-      "matcher": "compact",
-      "handler": {
-        "script": "echo '⚠️ CONTEXT COMPACTION DETECTED - Run /dev-init immediately before doing any work'"
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo Run /dev-init to load Anti-Hallucination Guidelines"
+          }
+        ]
       }
-    }
-  ],
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash(git status:*)",
