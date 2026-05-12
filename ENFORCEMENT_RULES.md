@@ -1053,7 +1053,7 @@ tracking, please use Prompt 3 (Change by Chg):
 1. Open: Manuscript/Chapters/Chapter_03/Chapter_03_chg.md
 
 2. Add this instruction:
-   ```
+```
    ### [INSTRUCTIONS FOR THIS REVISION]
 
    Add new section "Data Validation" after "Data Collection" section.
@@ -1074,7 +1074,7 @@ tracking, please use Prompt 3 (Change by Chg):
 
 Would you like me to draft the content for that section while you set
 this up?
-```
+   ```
 
 **Result:** ✅ COMPLIANT (routed to prompt, didn't directly modify)
 
@@ -1090,12 +1090,12 @@ Executes Prompt 2 to add new Chapter 4
 2. ✅ Creates `Manuscript/Chapters/Chapter_04/Chapter_04_chg.md` with initial entry:
    ```markdown
    ### Version 1.0.0 - 2025-11-19 - Initial chapter creation
-
+   
    **Type:** Content Addition
    **Scope:** New chapter
    **Priority:** High
    **Rationale:** Adding methodology chapter as Chapter 4
-
+   
    **Changes Made:**
    - Created initial chapter structure
    - Added placeholder sections
@@ -1172,7 +1172,7 @@ Each prompt file should include:
    **CRITICAL ENFORCEMENT:**
    - RULE 1: All file modifications MUST update corresponding _chg files
    - RULE 2: All Manuscript/ changes must go through appropriate prompts
-
+   
    See: ENFORCEMENT_RULES.md (Part 2: Integration Guide)
    ```
 
